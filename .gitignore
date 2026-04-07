@@ -3,7 +3,7 @@
 .pnpm-store/
 
 # Build outputs
-dist/
+# dist/  # 允许提交构建输出到 GitHub Pages
 build/
 *.dist
 
