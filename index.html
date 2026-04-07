@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>体彩P3 组选精算器</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        :root{--bg:#13151a;--s2:#1f232c;--s3:#252a34;--b1:#2a3040;--cy:#4fc3f7;--am:#ffa040;--t1:#dde3ee;--t2:#8896aa;--mono:'JetBrains Mono',monospace;--sans:'Noto Sans SC',sans-serif;--r:9px}
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{background:var(--bg);color:var(--t1);font-family:var(--sans);min-height:100vh}
+        .app{max-width:430px;margin:0 auto;padding:16px}
+        .hdr-title{font-size:18px;font-weight:700;margin-bottom:4px}
+        .hdr-subtitle{font-size:11px;color:var(--t2);letter-spacing:1px;margin-bottom:20px}
+        .tabs{display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid var(--b1);padding-bottom:12px}
+        .tab{cursor:pointer;color:var(--t2);border-bottom:2px solid transparent;font-size:14px;padding:8px}
+        .tab.active{color:var(--cy);border-bottom-color:var(--cy)}
+        .section{margin-bottom:16px}
+        .label{font-size:12px;color:var(--t2);margin-bottom:6px;display:block;text-transform:uppercase}
+        .input-group{display:flex;gap:8px}
+        .input-field{flex:1;padding:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-family:var(--mono);font-size:13px}
+        .input-field:focus{outline:none;border-color:var(--cy)}
+        .btn{width:100%;padding:12px;background:var(--cy);color:#000;border:none;border-radius:var(--r);font-weight:600;cursor:pointer}
+        .btn:hover{background:rgba(79,195,247,.8)}
+        .warning{background:rgba(255,160,64,.1);border:1px solid var(--am);padding:12px;border-radius:var(--r);margin:12px 0;font-size:12px;color:var(--am)}
+        .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+        .result-item{padding:12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);font-family:var(--mono);font-size:14px;text-align:center;font-weight:600;color:var(--am)}
+        .count{display:inline-block;background:var(--cy);color:#000;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:8px}
+        .review-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+        .review-table th{background:var(--s3);padding:8px;text-align:left;color:var(--cy);font-weight:600}
+        .review-table td{padding:8px;border-bottom:1px solid var(--b1);font-family:var(--mono)}
+        .empty{text-align:center;color:var(--t2);padding:32px}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="app">
+        <div class="hdr-title">体彩P3 组选精算器</div>
+        <div class="hdr-subtitle">Dual-Track Tactical Engine</div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(0)">精算台</div>
+            <div class="tab" onclick="switchTab(1)">复盘</div>
+        </div>
+        <div id="tab0">
+            <div class="section">
+                <label class="label">输入三期开奖号</label>
+                <div class="input-group">
+                    <input type="text" class="input-field" id="n1" placeholder="N-1" maxlength="3">
+                    <input type="text" class="input-field" id="n2" placeholder="N-2" maxlength="3">
+                    <input type="text" class="input-field" id="n3" placeholder="N-3" maxlength="3">
+                </div>
+            </div>
+            <div class="section">
+                <label class="label">当期期号</label>
+                <input type="text" class="input-field" id="period" placeholder="如 2026087" maxlength="7">
+            </div>
+            <button class="btn" onclick="calc()">录入开奖并推演</button>
+            <div id="warning"></div>
+            <div id="result" class="hidden">
+                <div class="section">
+                    <label class="label">推演结果<span class="count" id="count">0注</span></label>
+                    <div id="grid" class="result-grid"></div>
+                </div>
+            </div>
+        </div>
+        <div id="tab1" class="hidden">
+            <div id="review"></div>
+        </div>
+    </div>
+    <script>
+        const storage = {
+            get: () => JSON.parse(localStorage.getItem('p3') || '[]'),
+            set: (d) => localStorage.setItem('p3', JSON.stringify(d))
+        };
+        function getDigits(n) {
+            return String(n).padStart(3, '0').split('').map(Number);
+        }
+        function calc() {
+            const n1 = getDigits(document.getElementById('n1').value);
+            const n2 = getDigits(document.getElementById('n2').value);
+            const n3 = getDigits(document.getElementById('n3').value);
+            const period = document.getElementById('period').value;
+            if (!n1[0] || !n2[0] || !n3[0] || !period) {
+                alert('请输入所有数据');
+                return;
+            }
+            const sum1 = (n1[0] + n1[1] + n1[2]) % 10;
+            const radar1 = n1.includes(sum1);
+            const span2 = Math.max(...n2) - Math.min(...n2);
+            const radar2 = n2.includes(span2);
+            document.getElementById('warning').innerHTML = '';
+            if (radar1 || radar2) {
+                document.getElementById('warning').innerHTML = `<div class="warning">⚠️ 雷达触发停火：${radar1 ? '雷达一 ' : ''}${radar2 ? '雷达二' : ''}</div>`;
+                document.getElementById('result').classList.add('hidden');
+                const data = storage.get();
+                data.push({period, n1: n1.join(''), n2: n2.join(''), n3: n3.join(''), combos: [], kill: radar1 ? '雷达一' : '雷达二', actual: null});
+                storage.set(data);
+                updateReview();
+                return;
+            }
+            const c = ((n1[0] + n1[1] + n1[2]) % 2 === 1) ? n2[0] : n2[2];
+            const used = new Set([...n1, ...n2]);
+            const d = [0,1,2,3,4,5,6,7,8,9].filter(x => !used.has(x));
+            const n3Set = new Set(n3);
+            const n3Pool = d.filter(x => n3Set.has(x));
+            if (n3Pool.length === 0) {
+                document.getElementById('warning').innerHTML = '<div class="warning">⚠️ 物理死锁：N3 为空</div>';
+                document.getElementById('result').classList.add('hidden');
+                return;
+            }
+            let combos = [];
+            for (let n3v of n3Pool) {
+                for (let dv of d) {
+                    combos.push([c, n3v, dv].sort((a,b) => a-b));
+                }
+            }
+            const seen = new Set();
+            combos = combos.filter(c => {
+                const key = c.join(',');
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            combos = combos.filter(c => {
+                if (c[0] === c[1] && c[1] === c[2]) return false;
+                const sum = c[0] + c[1] + c[2];
+                if (sum < 8 || sum > 19) return false;
+                const roads = c.map(x => x % 3);
+                if (roads[0] === roads[1] && roads[1] === roads[2]) return false;
+                return true;
+            });
+            document.getElementById('result').classList.remove('hidden');
+            document.getElementById('count').textContent = combos.length + '注';
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < Math.min(20, combos.length); i++) {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.textContent = combos[i].join('');
+                grid.appendChild(div);
+            }
+            const data = storage.get();
+            data.push({period, n1: n1.join(''), n2: n2.join(''), n3: n3.join(''), combos, kill: null, actual: null});
+            storage.set(data);
+            updateReview();
+            document.getElementById('n1').value = document.getElementById('n2').value;
+            document.getElementById('n2').value = document.getElementById('n3').value;
+            document.getElementById('n3').value = '';
+            document.getElementById('period').value = String(parseInt(period) + 1);
+        }
+        function switchTab(i) {
+            document.querySelectorAll('.tab').forEach((t, idx) => t.classList.toggle('active', idx === i));
+            document.querySelectorAll('[id^="tab"]').forEach((t, idx) => t.classList.toggle('hidden', idx !== i));
+            if (i === 1) updateReview();
+        }
+        function updateReview() {
+            const data = storage.get();
+            const review = document.getElementById('review');
+            if (!data.length) {
+                review.innerHTML = '<div class="empty">暂无数据</div>';
+                return;
+            }
+            let html = '<table class="review-table"><tr><th>期号</th><th>开奖</th><th>注数</th><th>结果</th><th>误杀</th></tr>';
+            for (let item of data.slice().reverse()) {
+                const result = item.actual ? (item.combos.some(c => c.join('') === item.actual) ? '✓' : '✗') : '-';
+                html += `<tr><td>${item.period}</td><td>${item.n1}</td><td>${item.combos.length}</td><td>${result}</td><td>${item.kill || '-'}</td></tr>`;
+            }
+            review.innerHTML = html + '</table>';
+        }
+        updateReview();
+    </script>
+</body>
+</html>
