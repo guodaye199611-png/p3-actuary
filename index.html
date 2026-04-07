@@ -2,172 +2,273 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>体彩P3 组选精算器</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体彩排列三（P3）组选精算器</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&display=swap');
-        :root{--bg:#13151a;--s2:#1f232c;--s3:#252a34;--b1:#2a3040;--cy:#4fc3f7;--am:#ffa040;--t1:#dde3ee;--t2:#8896aa;--mono:'JetBrains Mono',monospace;--sans:'Noto Sans SC',sans-serif;--r:9px}
-        *{box-sizing:border-box;margin:0;padding:0}
-        html,body{background:var(--bg);color:var(--t1);font-family:var(--sans);min-height:100vh}
-        .app{max-width:430px;margin:0 auto;padding:16px}
-        .hdr-title{font-size:18px;font-weight:700;margin-bottom:4px}
-        .hdr-subtitle{font-size:11px;color:var(--t2);letter-spacing:1px;margin-bottom:20px}
-        .tabs{display:flex;gap:12px;margin-bottom:20px;border-bottom:1px solid var(--b1);padding-bottom:12px}
-        .tab{cursor:pointer;color:var(--t2);border-bottom:2px solid transparent;font-size:14px;padding:8px}
-        .tab.active{color:var(--cy);border-bottom-color:var(--cy)}
-        .section{margin-bottom:16px}
-        .label{font-size:12px;color:var(--t2);margin-bottom:6px;display:block;text-transform:uppercase}
-        .input-group{display:flex;gap:8px}
-        .input-field{flex:1;padding:10px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--t1);font-family:var(--mono);font-size:13px}
-        .input-field:focus{outline:none;border-color:var(--cy)}
-        .btn{width:100%;padding:12px;background:var(--cy);color:#000;border:none;border-radius:var(--r);font-weight:600;cursor:pointer}
-        .btn:hover{background:rgba(79,195,247,.8)}
-        .warning{background:rgba(255,160,64,.1);border:1px solid var(--am);padding:12px;border-radius:var(--r);margin:12px 0;font-size:12px;color:var(--am)}
-        .result-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
-        .result-item{padding:12px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);font-family:var(--mono);font-size:14px;text-align:center;font-weight:600;color:var(--am)}
-        .count{display:inline-block;background:var(--cy);color:#000;padding:2px 8px;border-radius:4px;font-size:11px;margin-left:8px}
-        .review-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
-        .review-table th{background:var(--s3);padding:8px;text-align:left;color:var(--cy);font-weight:600}
-        .review-table td{padding:8px;border-bottom:1px solid var(--b1);font-family:var(--mono)}
-        .empty{text-align:center;color:var(--t2);padding:32px}
-        .hidden{display:none!important}
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); color: #e0e0e0; font-family: 'Courier New', monospace; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #00d4ff; padding-bottom: 20px; }
+        .header h1 { color: #00d4ff; font-size: 28px; margin-bottom: 5px; }
+        .tabs { display: flex; gap: 20px; margin-bottom: 30px; border-bottom: 1px solid #333; }
+        .tab-btn { background: none; border: none; color: #888; cursor: pointer; padding: 10px 20px; font-size: 14px; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #00d4ff; border-bottom-color: #00d4ff; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .input-section { background: rgba(20, 25, 40, 0.8); border: 1px solid #333; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 8px; color: #00d4ff; font-size: 12px; }
+        .input-group input { width: 100%; padding: 12px; background: rgba(10, 14, 27, 0.9); border: 1px solid #444; color: #e0e0e0; border-radius: 4px; font-family: 'Courier New', monospace; }
+        .input-group input:focus { outline: none; border-color: #00d4ff; box-shadow: 0 0 10px rgba(0, 212, 255, 0.3); }
+        button { padding: 12px; background: #00d4ff; color: #0a0e27; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #00ffff; }
+        .result-section { background: rgba(20, 25, 40, 0.8); border: 1px solid #333; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+        .result-header { color: #00d4ff; font-size: 14px; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .combinations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+        .combo-item { background: rgba(0, 212, 255, 0.1); border: 1px solid #00d4ff; padding: 10px; text-align: center; border-radius: 4px; color: #00d4ff; }
+        .status-info { background: rgba(255, 100, 0, 0.1); border-left: 3px solid #ff6400; padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .status-info.success { background: rgba(0, 212, 255, 0.1); border-left-color: #00d4ff; }
+        .history-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .history-table th { background: rgba(0, 212, 255, 0.1); color: #00d4ff; padding: 12px; text-align: left; border-bottom: 1px solid #444; font-size: 12px; }
+        .history-table td { padding: 12px; border-bottom: 1px solid #333; font-size: 13px; }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div class="hdr-title">体彩P3 组选精算器</div>
-        <div class="hdr-subtitle">Dual-Track Tactical Engine</div>
+    <div class="container">
+        <div class="header">
+            <h1>体彩排列三 组选精算器</h1>
+            <p>DUAL-TRACK TACTICAL ENGINE</p>
+        </div>
+        
         <div class="tabs">
-            <div class="tab active" onclick="switchTab(0)">精算台</div>
-            <div class="tab" onclick="switchTab(1)">复盘</div>
+            <button class="tab-btn active" onclick="switchTab('calculator', this)">精算台</button>
+            <button class="tab-btn" onclick="switchTab('review', this)">复盘</button>
         </div>
-        <div id="tab0">
-            <div class="section">
-                <label class="label">输入三期开奖号</label>
+        
+        <div id="calculator" class="tab-content active">
+            <div class="input-section">
                 <div class="input-group">
-                    <input type="text" class="input-field" id="n1" placeholder="N-1" maxlength="3">
-                    <input type="text" class="input-field" id="n2" placeholder="N-2" maxlength="3">
-                    <input type="text" class="input-field" id="n3" placeholder="N-3" maxlength="3">
+                    <label>当期期号</label>
+                    <input type="text" id="currentPeriod" placeholder="例: 2026087" maxlength="7">
                 </div>
-            </div>
-            <div class="section">
-                <label class="label">当期期号</label>
-                <input type="text" class="input-field" id="period" placeholder="如 2026087" maxlength="7">
-            </div>
-            <button class="btn" onclick="calc()">录入开奖并推演</button>
-            <div id="warning"></div>
-            <div id="result" class="hidden">
-                <div class="section">
-                    <label class="label">推演结果<span class="count" id="count">0注</span></label>
-                    <div id="grid" class="result-grid"></div>
+                <div class="input-group">
+                    <label>当期开奖号（N-1）</label>
+                    <input type="text" id="n1Number" placeholder="例: 123" maxlength="3">
                 </div>
+                <div class="input-group">
+                    <label>上期开奖号（N-2）</label>
+                    <input type="text" id="n2Number" placeholder="例: 456" maxlength="3">
+                </div>
+                <div class="input-group">
+                    <label>上上期开奖号（N-3）</label>
+                    <input type="text" id="n3Number" placeholder="例: 789" maxlength="3">
+                </div>
+                <button onclick="calculateP3()" style="width: 100%;">录入开奖并推演</button>
+            </div>
+            
+            <div id="statusDiv" class="status-info" style="display: none;"></div>
+            <div class="result-section" id="resultSection" style="display: none;">
+                <div class="result-header">推演结果 - <span id="nextPeriod"></span></div>
+                <div id="resultContent"></div>
             </div>
         </div>
-        <div id="tab1" class="hidden">
-            <div id="review"></div>
+        
+        <div id="review" class="tab-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label>输入期号查看复盘</label>
+                    <input type="text" id="reviewPeriod" placeholder="例: 2026087" maxlength="7">
+                </div>
+                <button onclick="showReview()" style="width: 100%;">查看复盘</button>
+            </div>
+            <div class="result-section" id="reviewSection" style="display: none;">
+                <div class="result-header">复盘记录</div>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>期号</th>
+                            <th>开奖</th>
+                            <th>注数</th>
+                            <th>结果</th>
+                            <th>误杀</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewTableBody"></tbody>
+                </table>
+            </div>
         </div>
     </div>
+    
     <script>
-        const storage = {
-            get: () => JSON.parse(localStorage.getItem('p3') || '[]'),
-            set: (d) => localStorage.setItem('p3', JSON.stringify(d))
-        };
-        function getDigits(n) {
-            return String(n).padStart(3, '0').split('').map(Number);
-        }
-        function calc() {
-            const n1 = getDigits(document.getElementById('n1').value);
-            const n2 = getDigits(document.getElementById('n2').value);
-            const n3 = getDigits(document.getElementById('n3').value);
-            const period = document.getElementById('period').value;
-            if (!n1[0] || !n2[0] || !n3[0] || !period) {
-                alert('请输入所有数据');
-                return;
+        class P3Calculator {
+            constructor(n1, n2, n3) {
+                this.n1 = n1.split('').map(Number);
+                this.n2 = n2.split('').map(Number);
+                this.n3 = n3.split('').map(Number);
+                this.radarKill = null;
             }
-            const sum1 = (n1[0] + n1[1] + n1[2]) % 10;
-            const radar1 = n1.includes(sum1);
-            const span2 = Math.max(...n2) - Math.min(...n2);
-            const radar2 = n2.includes(span2);
-            document.getElementById('warning').innerHTML = '';
-            if (radar1 || radar2) {
-                document.getElementById('warning').innerHTML = `<div class="warning">⚠️ 雷达触发停火：${radar1 ? '雷达一 ' : ''}${radar2 ? '雷达二' : ''}</div>`;
-                document.getElementById('result').classList.add('hidden');
-                const data = storage.get();
-                data.push({period, n1: n1.join(''), n2: n2.join(''), n3: n3.join(''), combos: [], kill: radar1 ? '雷达一' : '雷达二', actual: null});
-                storage.set(data);
-                updateReview();
-                return;
+            
+            checkRadar1() {
+                const sum = this.n1.reduce((a, b) => a + b, 0);
+                const lastDigit = sum % 10;
+                return this.n1.includes(lastDigit);
             }
-            const c = ((n1[0] + n1[1] + n1[2]) % 2 === 1) ? n2[0] : n2[2];
-            const used = new Set([...n1, ...n2]);
-            const d = [0,1,2,3,4,5,6,7,8,9].filter(x => !used.has(x));
-            const n3Set = new Set(n3);
-            const n3Pool = d.filter(x => n3Set.has(x));
-            if (n3Pool.length === 0) {
-                document.getElementById('warning').innerHTML = '<div class="warning">⚠️ 物理死锁：N3 为空</div>';
-                document.getElementById('result').classList.add('hidden');
-                return;
+            
+            checkRadar2() {
+                const span = Math.max(...this.n2) - Math.min(...this.n2);
+                return this.n2.includes(span);
             }
-            let combos = [];
-            for (let n3v of n3Pool) {
-                for (let dv of d) {
-                    combos.push([c, n3v, dv].sort((a,b) => a-b));
+            
+            checkRadars() {
+                if (this.checkRadar1()) { this.radarKill = '雷达一'; return false; }
+                if (this.checkRadar2()) { this.radarKill = '雷达二'; return false; }
+                return true;
+            }
+            
+            getC() {
+                const sum = this.n1.reduce((a, b) => a + b, 0);
+                return sum % 2 === 1 ? this.n2[0] : this.n2[2];
+            }
+            
+            getD() {
+                const used = new Set([...this.n1, ...this.n2]);
+                const pool = [];
+                for (let i = 0; i < 10; i++) {
+                    if (!used.has(i)) pool.push(i);
                 }
+                return pool;
             }
-            const seen = new Set();
-            combos = combos.filter(c => {
-                const key = c.join(',');
-                if (seen.has(key)) return false;
-                seen.add(key);
-                return true;
-            });
-            combos = combos.filter(c => {
-                if (c[0] === c[1] && c[1] === c[2]) return false;
-                const sum = c[0] + c[1] + c[2];
-                if (sum < 8 || sum > 19) return false;
-                const roads = c.map(x => x % 3);
-                if (roads[0] === roads[1] && roads[1] === roads[2]) return false;
-                return true;
-            });
-            document.getElementById('result').classList.remove('hidden');
-            document.getElementById('count').textContent = combos.length + '注';
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            for (let i = 0; i < Math.min(20, combos.length); i++) {
-                const div = document.createElement('div');
-                div.className = 'result-item';
-                div.textContent = combos[i].join('');
-                grid.appendChild(div);
+            
+            getN3() {
+                const D = this.getD();
+                return this.n3.filter(num => D.includes(num));
             }
-            const data = storage.get();
-            data.push({period, n1: n1.join(''), n2: n2.join(''), n3: n3.join(''), combos, kill: null, actual: null});
-            storage.set(data);
-            updateReview();
-            document.getElementById('n1').value = document.getElementById('n2').value;
-            document.getElementById('n2').value = document.getElementById('n3').value;
-            document.getElementById('n3').value = '';
-            document.getElementById('period').value = String(parseInt(period) + 1);
+            
+            generateCombinations() {
+                const C = this.getC();
+                const D = this.getD();
+                const N3 = this.getN3();
+                if (N3.length === 0) return [];
+                const combos = new Set();
+                for (const n3Num of N3) {
+                    for (const dNum of D) {
+                        const trio = [C, n3Num, dNum].sort((a, b) => a - b);
+                        combos.add(trio.join(''));
+                    }
+                }
+                return Array.from(combos);
+            }
+            
+            filterCombinations(combos) {
+                return combos.filter(combo => {
+                    const digits = combo.split('').map(Number);
+                    if (digits[0] === digits[1] && digits[1] === digits[2]) return false;
+                    const sum = digits.reduce((a, b) => a + b, 0);
+                    if (sum < 8 || sum > 19) return false;
+                    const roads = digits.map(d => d % 3);
+                    if (roads[0] === roads[1] && roads[1] === roads[2]) return false;
+                    return true;
+                });
+            }
+            
+            calculate() {
+                if (!this.checkRadars()) {
+                    return { success: false, radarKill: this.radarKill, combos: [] };
+                }
+                const N3 = this.getN3();
+                if (N3.length === 0) {
+                    return { success: false, radarKill: '物理死锁', combos: [] };
+                }
+                let combos = this.generateCombinations();
+                combos = this.filterCombinations(combos);
+                return { success: true, combos: combos, radarKill: null };
+            }
         }
-        function switchTab(i) {
-            document.querySelectorAll('.tab').forEach((t, idx) => t.classList.toggle('active', idx === i));
-            document.querySelectorAll('[id^="tab"]').forEach((t, idx) => t.classList.toggle('hidden', idx !== i));
-            if (i === 1) updateReview();
+        
+        function saveRecord(period, n1, n2, n3, combos) {
+            const records = JSON.parse(localStorage.getItem('p3Records') || '{}');
+            const nextPeriod = String(parseInt(period) + 1).padStart(7, '0');
+            records[nextPeriod] = { n1, n2, n3, combos, timestamp: new Date().toISOString() };
+            localStorage.setItem('p3Records', JSON.stringify(records));
         }
-        function updateReview() {
-            const data = storage.get();
-            const review = document.getElementById('review');
-            if (!data.length) {
-                review.innerHTML = '<div class="empty">暂无数据</div>';
+        
+        function getRecord(period) {
+            const records = JSON.parse(localStorage.getItem('p3Records') || '{}');
+            return records[period] || null;
+        }
+        
+        function switchTab(tab, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            btn.classList.add('active');
+        }
+        
+        function calculateP3() {
+            const period = document.getElementById('currentPeriod').value;
+            const n1 = document.getElementById('n1Number').value;
+            const n2 = document.getElementById('n2Number').value;
+            const n3 = document.getElementById('n3Number').value;
+            
+            if (!period || !n1 || !n2 || !n3 || n1.length !== 3 || n2.length !== 3 || n3.length !== 3) {
+                alert('请填写所有字段，每个开奖号必须是 3 位数字');
                 return;
             }
-            let html = '<table class="review-table"><tr><th>期号</th><th>开奖</th><th>注数</th><th>结果</th><th>误杀</th></tr>';
-            for (let item of data.slice().reverse()) {
-                const result = item.actual ? (item.combos.some(c => c.join('') === item.actual) ? '✓' : '✗') : '-';
-                html += `<tr><td>${item.period}</td><td>${item.n1}</td><td>${item.combos.length}</td><td>${result}</td><td>${item.kill || '-'}</td></tr>`;
+            
+            const calc = new P3Calculator(n1, n2, n3);
+            const result = calc.calculate();
+            
+            const statusDiv = document.getElementById('statusDiv');
+            const resultSection = document.getElementById('resultSection');
+            const nextPeriod = String(parseInt(period) + 1).padStart(7, '0');
+            
+            if (!result.success) {
+                statusDiv.innerHTML = `<p>⚠️ ${result.radarKill} - 当日停火，0 注推演</p>`;
+                statusDiv.classList.remove('success');
+                statusDiv.style.display = 'block';
+                resultSection.style.display = 'none';
+            } else {
+                statusDiv.innerHTML = `<p>✓ 双子星雷达绿灯 - 推演成功</p>`;
+                statusDiv.classList.add('success');
+                statusDiv.style.display = 'block';
+                document.getElementById('nextPeriod').textContent = nextPeriod;
+                document.getElementById('resultContent').innerHTML = `
+                    <p style="margin-bottom: 15px; color: #00d4ff;">共 ${result.combos.length} 注</p>
+                    <div class="combinations-grid">
+                        ${result.combos.map(combo => `<div class="combo-item">${combo}</div>`).join('')}
+                    </div>
+                `;
+                resultSection.style.display = 'block';
             }
-            review.innerHTML = html + '</table>';
+            
+            saveRecord(period, n1, n2, n3, result.combos);
         }
-        updateReview();
+        
+        function showReview() {
+            const period = document.getElementById('reviewPeriod').value;
+            if (!period) { alert('请输入期号'); return; }
+            const record = getRecord(period);
+            if (!record) { alert('未找到该期记录'); return; }
+            const lotteryNumber = prompt('请输入该期实际开奖号（3位数字）');
+            if (!lotteryNumber || lotteryNumber.length !== 3) { alert('开奖号无效'); return; }
+            const hit = record.combos.some(combo => {
+                const comboDigits = combo.split('').sort();
+                const lotteryDigits = lotteryNumber.split('').sort();
+                return comboDigits.join('') === lotteryDigits.join('');
+            });
+            const result = hit ? '命中' : '未中';
+            const radarKill = record.combos.length === 0 ? '雷达一/二' : '-';
+            document.getElementById('reviewTableBody').innerHTML = `
+                <tr>
+                    <td>${period}</td>
+                    <td>${lotteryNumber}</td>
+                    <td>${record.combos.length}</td>
+                    <td style="color: ${hit ? '#00ff00' : '#ff4444'}">${result}</td>
+                    <td>${radarKill}</td>
+                </tr>
+            `;
+            document.getElementById('reviewSection').style.display = 'block';
+        }
     </script>
 </body>
 </html>
